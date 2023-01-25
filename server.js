@@ -4,16 +4,13 @@
  *  No part of this assignment has been copied manually or electronically from any other source
  *  (including web sites) or distributed to other students.
  * 
- *  Name: _________Delisha Madhan _____________ Student ID: ______________ Date: __20th January, 2023______________
+ *  Name:  Delisha Madhan __ Student ID:  166471219___ Date: 20th January, 2023
  *
- *  Cyclic Web App URL: ______________________________________________________
+ *  Cyclic Web App URL: https://sapphire-bighorn-sheep-tie.cyclic.app/ 
  *
- *  GitHub Repository URL: _____________________________________________________
+ *  GitHub Repository URL:   https://github.com/delishamadhan/web322-dmadhan 
  *
  ********************************************************************************/
-
-
-
 
 
 var HTTP_PORT = process.env.PORT || 8080;
