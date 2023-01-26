@@ -13,14 +13,78 @@
  ********************************************************************************/
 
 
-var HTTP_PORT = process.env.PORT || 8080;
-var express = require("express");
-var app = express();
+var express = require('express')
+var data = require('./blog-service')
+var app = express()
+const fs = require('fs');
+//require('dotenv').config();
+const bodyparser = require('body-parser');
+app.use(express.static('public'))
+app.use(bodyparser.json());
+
+var PORT = process.env.PORT || 8080
 
 // setup a 'route' to listen on the default url path
 app.get("/", (req, res) => {
-    res.send("Delisha Madhan - 166471219");
+    //res.send("Delisha Madhan - 166471219");
+    res.redirect("/about");
 });
 
+app.get("/about", (req, res) => {
+
+    res.sendFile('./views/about.html', { root: __dirname });
+});
+
+
+app.get("/blog", (req, res) => {
+    data.getPublishedPosts().then(data => {
+            res.send(data);
+
+        })
+        .catch(err => {
+            res.send("No posts Found !");
+        })
+
+});
+app.get("/posts", (req, res) => {
+    data.getallPosts().then(data => {
+            res.send(data);
+
+        })
+        .catch(err => {
+            res.send("Can not Fetch data");
+        })
+});
+app.get("/categories", (req, res) => {
+    data.getCategories().then(data => {
+            res.send(data);
+
+        })
+        .catch(err => {
+            res.send("can not Fetch results !! ");
+        })
+});
+
+app.use(function(req, res, next) {
+    res.status(404);
+
+    // respond with html page
+    if (req.accepts('html')) {
+        res.sendFile('./views/pageNotFound.html', { root: __dirname });
+        return;
+    }
+});
+
+
+
 // setup http server to listen on HTTP_PORTs
-app.listen(HTTP_PORT);
+// initilize the App 
+data.initialize().then(() => {
+        app.listen(PORT, () => {
+            console.log(`App is listening on port ${PORT}`)
+        })
+    })
+    .catch(err => {
+        console.log("Can not start App");
+        console.log(err)
+    });
