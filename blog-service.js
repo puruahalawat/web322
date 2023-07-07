@@ -130,3 +130,14 @@ module.exports.getPostById = (id) => {
 
     });
 }
+
+module.exports.getPublishedPostsByCategory = (category) => {
+    return new Promise((resolve, reject) => {
+        var filtered = postsArray.filter(post => post.published == true && post.category == category);
+        if (filtered.length > 0) {
+            resolve(filtered);
+        } else {
+            reject("no results returned");
+        }
+    });
+}

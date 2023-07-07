@@ -1,10 +1,10 @@
 /*********************************************************************************
- *  WEB322 – Assignment 3
+ *  WEB322 – Assignment 4
  *  I declare that this assignment is my own work in accordance with Seneca Academic Policy.  
  *  No part of this assignment has been copied manually or electronically from any other source
  *  (including web sites) or distributed to other students.
  * 
- *  Name:  Delisha Madhan __ Student ID:  166471219___ Date: 15th February, 2023
+ *  Name:  Puru Ahalawat __ Student ID:  170440218___ Date: 07th July, 2023
  *
  *  Cyclic Web App URL: https://sapphire-bighorn-sheep-tie.cyclic.app/ 
  *
@@ -15,6 +15,8 @@
 var express = require('express')
 var data = require('./blog-service')
 var app = express()
+var path = require("path");
+const exphbs = require('express-handlebars');
 const fs = require('fs');
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -22,7 +24,7 @@ const streamifier = require('streamifier');
 const bodyparser = require('body-parser');
 app.use(express.static('public'))
 app.use(bodyparser.json());
-
+const stripJs = require('strip-js');
 
 var PORT = process.env.PORT || 8080
 
@@ -40,54 +42,145 @@ cloudinary.config({
 const upload = multer();
 
 
+app.engine('.hbs', exphbs.engine({
+    extname: '.hbs',
+    defaultLayout: 'main',
+
+    helpers: {
+        navLink: function(url, options) {
+            return '<li' +
+                ((url == app.locals.activeRoute) ? ' class="active" ' : '') +
+                '><a href="' + url + '">' + options.fn(this) + '</a></li>';
+        },
+        safeHTML: function(context) {
+            return stripJs(context);
+
+        },
+
+        equal: function(lvalue, rvalue, options) {
+            if (arguments.length < 3)
+                throw new Error("Handlebars Helper equal needs 2 parameters");
+            if (lvalue != rvalue) {
+                return options.inverse(this);
+            } else {
+                return options.fn(this);
+            }
+        }
+
+    }
+}));
+
+
+app.use(function(req, res, next) {
+    let route = req.path.substring(1);
+    app.locals.activeRoute = "/" + (isNaN(route.split('/')[1]) ? route.replace(/\/(?!.*)/, "") : route.replace(/\/(.*)/, ""));
+    app.locals.viewingCategory = req.query.category;
+    next();
+});
+
+
+app.set('view engine', '.hbs');
 
 // setup a 'route' to listen on the default url path
 app.get("/", (req, res) => {
     //res.send("Delisha Madhan - 166471219");
-    res.redirect("/about");
+    res.redirect("/blog");
 });
 
 app.get("/about", (req, res) => {
 
-    res.sendFile('./views/about.html', { root: __dirname });
+
+    res.render(path.join(__dirname + "/views/about.hbs"));
 });
 
 
-app.get("/blog", (req, res) => {
-    data.getPublishedPosts().then(data => {
-            res.send(data);
+app.get('/blog', async(req, res) => {
+    var viewData = { post: {}, posts: [] };
+    try {
+        let posts = [];
+        if (req.query.category) {
+            posts = await data.getPostsByCategory(req.query.category);
+        } else {
+            posts = await data.getallPosts();
+        }
+        posts.sort((a, b) => new Date(b.postDate) - new Date(a.postDate));
+        let post = posts[0];
+        viewData.posts = posts;
+        viewData.post = post;
 
-        })
-        .catch(err => {
-            res.send("No posts Found !");
-        })
-
-});
-
-
-app.get('/posts', (req, res) => {
-    let queryPromise = null;
-
-    // by category query 
-    if (req.query.category) {
-        queryPromise = data.getPostsByCategory(req.query.category);
-        // by mindate Query 
-    } else if (req.query.minDate) {
-        queryPromise = data.getPostsByMinDate(req.query.minDate);
-        //all posts 
-    } else {
-        queryPromise = data.getallPosts()
+    } catch (err) {
+        viewData.message = "no results";
     }
+    try {
+        let categories = await data.getCategories();
+        viewData.categories = categories;
+    } catch (err) {
+        viewData.categoriesMessage = "no results"
+    }
+    console.log(viewData.post);
+    res.render("blog", { data: viewData })
+});
 
-    queryPromise.then(data => {
-        res.send(data)
-    }).catch(err => {
-        res.render("No Posts Found");
-    })
+app.get('/blog/:id', async(req, res) => { 
+    var viewData = { post: {}, posts: [] };
+    try {
+        let posts = [];
+        if (req.query.category) {
+            posts = await data.getPublishedPostsByCategory(req.query.category);
+        } else {
+            posts = await data.getPublishedPosts();
+        }
+        posts.sort((a, b) => new Date(b.postDate) - new Date(a.postDate));
+        viewData.posts = posts;
+    } catch (err) {
+        viewData.message = "no results";
+    }
+    try {
+        viewData.post = await data.getPostById(req.params.id);
+    } catch (err) {
+        viewData.message = "no results";
+    }
+    try {
+        let categories = await data.getCategories();
+        viewData.categories = categories;
+    } catch (err) {
+        viewData.categoriesMessage = "no results"
+    }
+    res.render("blog", { data: viewData })
+});
+
+app.get("/posts", (req, res) => {
+    let category = req.query.category;
+    let minDate = req.query.minDate;
+    if (category) {
+        data.getPostsByCategory(category).then(data => {
+            if (data.length > 0) {
+                res.render("posts", { posts: data });
+            } else {
+                res.render("posts", { message: "no results" });
+            }
+        })
+    } else if (minDate != "" && minDate != null) {
+        data.getPostsByMinDate(minDate).then(data => {
+            if (data.length > 0) {
+                res.render("posts", { posts: data });
+            } else {
+                res.render("posts", { message: "no results" });
+            }
+        })
+    } else {
+        data.getallPosts().then(data => {
+            if (data.length > 0) {
+                res.render("posts", { posts: data });
+            } else {
+                res.render("posts", { message: "no results" });
+            }
+        })
+    }
 });
 
 app.get("/posts/add", (req, res) => {
-    res.sendFile('./views/addPost.html', { root: __dirname });
+    res.render(path.join(__dirname + "/views/addPost.hbs"));
 });
 
 // post/value route 
@@ -136,19 +229,19 @@ app.post('/posts/add', upload.single('featureImage'), (req, res) => {
 
 app.get("/categories", (req, res) => {
     data.getCategories().then(data => {
-            res.send(data);
-
-        })
-        .catch(err => {
-            res.send("can not Fetch results !! ");
-        })
+        if (data.length > 0) {
+            res.render("categories", { categories: data });
+        } else {
+            res.render("categories", { message: "no results" });
+        }
+    })
 });
 
 app.use(function(req, res, next) {
     res.status(404);
     // respond with html page
     if (req.accepts('html')) {
-        res.sendFile('./views/pageNotFound.html', { root: __dirname });
+        res.render(path.join(__dirname + "/views/pageNotFound.hbs"));
         return;
     }
 });
