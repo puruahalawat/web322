@@ -6,7 +6,7 @@
  * 
  *  Name:  Puru Ahalawat __ Student ID:  170440218__ Date: 07th July, 2023
  *
- *  Cyclic Web App URL:  
+ *  Cyclic Web App URL:  https://drab-plum-bunny-toga.cyclic.app/blog
  *
  *  GitHub Repository URL:    
  *
