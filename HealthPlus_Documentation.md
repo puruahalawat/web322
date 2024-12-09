@@ -26,7 +26,7 @@ The HealthPlus application is a Salesforce Lightning-based platform developed to
 ## 2. Project Structure
 
 ### 2.1 Back-End (Spring Boot)
-```
+
 src/
 ├── main/
 │   ├── java/ca/seneca/healthplussalesforcelightning/
@@ -38,10 +38,9 @@ src/
 │   ├── resources/
 │       └── application.properties # App configurations.
 └── test/                   # Unit tests.
-```
 
 ### 2.2 Front-End (React.js)
-```
+
 src/
 ├── components/            # UI components (e.g., Dashboard, Member List).
 ├── styles/                # CSS files for styling.
@@ -49,7 +48,6 @@ src/
 ├── App.js                 # Main app entry point.
 ├── index.js               # Renders the app.
 └── assets/                # Images and fonts.
-```
 
 ---
 
@@ -68,19 +66,18 @@ public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
     String token = authService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
     return ResponseEntity.ok(new JwtResponse(token));
 }
-```
-- **Parameters**: `LoginRequest` with fields `username` and `password`.
-- **Returns**: A JWT token on successful authentication.
 
----
+	•	Parameters: LoginRequest with fields username and password.
+	•	Returns: A JWT token on successful authentication.
 
-### 3.2 Models
+3.2 Models
 
-#### Users
+Users
+
 Represents user data with roles like Admin or Member.
 
-**Code Example**:
-```java
+Code Example:
+
 @Entity
 public class Users {
     @Id
@@ -92,41 +89,39 @@ public class Users {
 
     // Getters and Setters
 }
-```
-- **Fields**: `id`, `name`, `email`, `role`.
-- **Annotations**:
-  - `@Entity`: Marks it as a database entity.
-  - `@Id`: Indicates the primary key.
 
----
+	•	Fields: id, name, email, role.
+	•	Annotations:
+	•	@Entity: Marks it as a database entity.
+	•	@Id: Indicates the primary key.
 
-### 3.3 Services
+3.3 Services
 
-#### MemberService
+MemberService
+
 Implements business logic for managing members.
 
-**Example Function**:
-```java
+Example Function:
+
 public Members addMember(Members member) {
     return membersRepository.save(member);
 }
-```
-- **Purpose**: Saves a new member to the database.
-- **Parameters**: `Members` object.
-- **Returns**: The saved `Members` entity.
 
----
+	•	Purpose: Saves a new member to the database.
+	•	Parameters: Members object.
+	•	Returns: The saved Members entity.
 
-## 4. Front-End Documentation
+4. Front-End Documentation
 
-### 4.1 Components
+4.1 Components
 
-#### Dashboard
-**File Path**: `src/components/Dashboard.jsx`  
+Dashboard
+
+File Path: src/components/Dashboard.jsx
 Displays an overview of activities.
 
-**Code Example**:
-```jsx
+Code Example:
+
 const Dashboard = ({ classes, members }) => (
     <div>
         <h1>Dashboard</h1>
@@ -135,94 +130,88 @@ const Dashboard = ({ classes, members }) => (
     </div>
 );
 export default Dashboard;
-```
-- **Props**: `classes`, `members`.
-- **Purpose**: Displays the total number of active classes and members.
 
----
+	•	Props: classes, members.
+	•	Purpose: Displays the total number of active classes and members.
 
-### 4.2 Utils
+4.2 Utils
 
-#### membershipPlans.js
-**File Path**: `src/utils/membershipPlans.js`
+membershipPlans.js
 
-**Code Example**:
-```javascript
+File Path: src/utils/membershipPlans.js
+
+Code Example:
+
 export const calculateMembershipCost = (plan, duration) => {
     const costPerMonth = plan === "Premium" ? 50 : 30;
     return costPerMonth * duration;
 };
-```
-- **Parameters**: `plan` (string), `duration` (number).
-- **Returns**: Total cost of the membership.
 
----
+	•	Parameters: plan (string), duration (number).
+	•	Returns: Total cost of the membership.
 
-## 5. API Documentation
+5. API Documentation
 
-### Example: Create a Booking
-#### Endpoint: **POST** `/api/bookings`
-**Request**:
-```json
+Example: Create a Booking
+
+Endpoint: POST /api/bookings
+
+Request:
+
 {
   "memberId": 1,
   "classId": 2
 }
-```
-**Response**:
-```json
+
+Response:
+
 {
   "message": "Booking created successfully!"
 }
-```
+
+6. Visual References
+	•	Dashboard:
+
+7. Setup Instructions
+
+7.1 Back-End
+	1.	Clone the repository:
+
+git clone <back-end-repo-url>
+
+
+	2.	Navigate to the project folder:
+
+cd healthplus-backend
+
+
+	3.	Run the application:
+
+mvn spring-boot:run
+
+
+
+7.2 Front-End
+	1.	Navigate to the project:
+
+cd healthplus-frontend
+
+
+	2.	Install dependencies:
+
+npm install
+
+
+	3.	Run the server:
+
+npm start
+
+8. Known Issues and Future Enhancements
+	•	Current Limitations:
+	•	No billing integration.
+	•	Limited analytics features.
+	•	Future Plans:
+	•	Mobile app for on-the-go access.
+	•	Advanced reporting with AI integration.
 
 ---
-
-## 6. Visual References
-
-- **Dashboard**:
-  ![Dashboard](images/dashboard.png)
-
----
-
-## 7. Setup Instructions
-
-### 7.1 Back-End
-1. Clone the repository:
-   ```bash
-   git clone <back-end-repo-url>
-   ```
-2. Navigate to the project folder:
-   ```bash
-   cd healthplus-backend
-   ```
-3. Run the application:
-   ```bash
-   mvn spring-boot:run
-   ```
-
-### 7.2 Front-End
-1. Navigate to the project:
-   ```bash
-   cd healthplus-frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the server:
-   ```bash
-   npm start
-   ```
-
----
-
-## 8. Known Issues and Future Enhancements
-
-- **Current Limitations**:
-  - No billing integration.
-  - Limited analytics features.
-
-- **Future Plans**:
-  - Mobile app for on-the-go access.
-  - Advanced reporting with AI integration.
